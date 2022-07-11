@@ -35,7 +35,7 @@ nc.close()
 # Now import Feb.
 nc = Dataset('pv.202102.nc', 'r')
 time_feb = num2date(nc.variables['time'][:], nc.variables['time'].units, nc.variables['time'].calendar, only_use_cftime_datetimes=False, only_use_python_datetimes=True)
-pv_feb = pv_feb = nc.variables['pv'][:, lat_ind1:lat_ind2+1, :]
+pv_feb = nc.variables['pv'][:, lat_ind1:lat_ind2+1, :]
 nc.close()
 
 # Set longitude and latitude regional arrays.
