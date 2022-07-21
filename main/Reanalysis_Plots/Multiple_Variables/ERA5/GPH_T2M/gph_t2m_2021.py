@@ -42,7 +42,7 @@ nc.close()
 
 ###### Read in hgt ltm data. ######
 # Choose directory where ltm data is stored.
-directory = '/data/deluge/scratch/ERA5/3D/4xdaily/hgt'
+directory = '/data/deluge/reanalysis/REANALYSIS/ERA5/3D/4xdaily/hgt'
 path = os.chdir(directory)
 
 # Read in 1981-2010 ltm hgt array.
@@ -90,7 +90,7 @@ nc.close()
 
 ###### Now read in T2M ltm data ######
 # Go to directory where ltm data is stored.
-directory = '/data/deluge/scratch/ERA5/2D/4xdaily/t2m'
+directory = '/data/deluge/reanalysis/REANALYSIS/ERA5/2D/4xdaily/t2m'
 path = os.chdir(directory)
 
 # Read in 1981-2010 ltm t2m array.
@@ -162,6 +162,8 @@ for i in range(3):
     # Contour the geopotential height anomalies and label.
     lines2 = map.contour(x, y, hgts_shifted, levels = [-30, -25, -20, -15, -10,-5, 5, 10, 15, 20, 25, 30], colors = 'black')
     plt.clabel(lines2)
+    # Draw Great Plains polygon.
+    p1, p2, p3, p4 = DrawPolygon(map, lat_range = [48, 30], lon_range = [256.5, 268.5], grid_space = 0.5, lw = 2, color = 'purple')
     # Set figure title.
     ax.set_title(f"{labels[i]} {periods_all[i][0].strftime('%Y-%m-%d')} - {periods_all[i][1].strftime('%Y-%m-%d')}", fontsize = 14, weight = 'bold')
     plt.tight_layout()
