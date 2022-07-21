@@ -1,4 +1,4 @@
-end_date###### Import modules ######
+###### Import modules ######
 import numpy as np
 from netCDF4 import Dataset, num2date
 import os
@@ -251,7 +251,7 @@ ax.bar(labels, wcr_count, label = 'WCR', color = 'darkblue', bottom = pt_count, 
 ax.bar(labels, akr_count, label = 'AkR', color = 'orange', bottom = pt_count+wcr_count, edgecolor = 'black')
 ax.bar(labels, arh_count, label = 'ArH', color = 'darkred', bottom = pt_count+wcr_count+akr_count, edgecolor = 'black')
 ax.bar(labels, arl_count, label = 'ArL', color = 'purple', bottom = pt_count+wcr_count+akr_count+arh_count, edgecolor = 'black')
-plt.xlabel('Initialization Date (Month-Day)', fontsize = 10, weight = 'bold')
+plt.xlabel('Initialization Date (Month/Day)', fontsize = 10, weight = 'bold')
 plt.xticks(labels, rotation = 30)
 plt.ylabel('Ensemble Member Count', fontsize = 10, weight = 'bold')
 # Shrink current axis by 20%
