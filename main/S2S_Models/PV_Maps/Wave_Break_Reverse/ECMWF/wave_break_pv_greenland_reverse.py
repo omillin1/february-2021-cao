@@ -24,7 +24,7 @@ lat1, lat2 = 90, 9
 lon1, lon2 = 0, 358.5
 
 # Now read in the PV data for the run.
-dir = '/data/deluge/scratch/S2S/realtime/ECMWF/pv'
+dir = '/data/deluge/models/S2S/realtime/ECMWF/pv'
 path = os.chdir(dir)
 
 # Data is time, number, level, lat, lon.
@@ -80,7 +80,7 @@ no_members = 5
 lowest_members, highest_members = ind_sort[:no_members], ind_sort[-no_members:]
 
 # Now read in the surfT data for this run.
-dir = '/data/deluge/scratch/S2S/realtime/ECMWF/surfT'
+dir = '/data/deluge/models/S2S/realtime/ECMWF/surfT'
 path = os.chdir(dir)
 
 # Data is time, number, lat, lon.
@@ -148,7 +148,7 @@ level_ind = np.where(ltm_levels_hgt == level)[0][0]
 hgt_ltm_region = ltm_hgt[:, :, level_ind, ltm_lat_ind1_hgt:ltm_lat_ind2_hgt+1, ltm_lon_ind1_hgt:ltm_lon_ind2_hgt+1]
 
 # Now read in the hgt data for this run.
-dir = '/data/deluge/scratch/S2S/realtime/ECMWF/hgt'
+dir = '/data/deluge/models/S2S/realtime/ECMWF/hgt'
 path = os.chdir(dir)
 
 # Data is time, number, lat, lon.
@@ -238,7 +238,7 @@ for i in tqdm(range(len(dates_select))):
         lines = map.contour(x, y, lowpv_hgt_shifted, levels = [-30, -25, -20, -15, -10,-5, 5, 10, 15, 20, 25, 30], colors = 'black')
         plt.clabel(lines)
         pcol = plt.pcolor(x, y, surfT_masked, hatch = '////', alpha = 0)
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [48, 30], lon_range = [256.5, 268.5], grid_space = 1.5, lw = 2, color = 'purple')
+        #p1, p2, p3, p4 = DrawPolygon(map, lat_range = [48, 30], lon_range = [256.5, 268.5], grid_space = 1.5, lw = 2, color = 'purple')
         ax.set_title(f"{labels[i]} {dates_select[i].strftime('%Y/%m/%d')}", fontsize = 14, weight = 'bold')
         text = ax.text(-700000,3500000,"Low PV Members", size=13, verticalalignment='center', rotation=90., weight = 'bold')
         plt.tight_layout()
@@ -259,7 +259,7 @@ for i in tqdm(range(len(dates_select))):
         lines = map.contour(x, y, lowpv_hgt_shifted, levels = [-30, -25, -20, -15, -10,-5, 5, 10, 15, 20, 25, 30], colors = 'black')
         plt.clabel(lines)
         pcol = plt.pcolor(x, y, surfT_masked, hatch = '////', alpha = 0)
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [48, 30], lon_range = [256.5, 268.5], grid_space = 1.5, lw = 2, color = 'purple')
+        #p1, p2, p3, p4 = DrawPolygon(map, lat_range = [48, 30], lon_range = [256.5, 268.5], grid_space = 1.5, lw = 2, color = 'purple')
         ax.set_title(f"{labels[i]} {dates_select[i].strftime('%Y/%m/%d')}", fontsize = 14, weight = 'bold')
         plt.tight_layout()
 
@@ -279,7 +279,7 @@ for i in range(len(dates_select)):
         cs = map.contourf(x, y, highpv_surfT_shifted, clevs, norm = norm, extend='both', cmap = my_cmap)
         lines = map.contour(x, y, highpv_hgt_shifted, levels = [-30, -25, -20, -15, -10,-5, 5, 10, 15, 20, 25, 30], colors = 'black')
         plt.clabel(lines)
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [48, 30], lon_range = [256.5, 268.5], grid_space = 1.5, lw = 2, color = 'purple')
+        #p1, p2, p3, p4 = DrawPolygon(map, lat_range = [48, 30], lon_range = [256.5, 268.5], grid_space = 1.5, lw = 2, color = 'purple')
         text = ax.text(-700000,3500000,"High PV Members", size=13, verticalalignment='center', rotation=90., weight = 'bold')
         ax.set_title(f"{labels[i+3]} {dates_select[i].strftime('%Y/%m/%d')}", fontsize = 14, weight = 'bold')
         plt.tight_layout()
@@ -298,7 +298,7 @@ for i in range(len(dates_select)):
         cs = map.contourf(x, y, highpv_surfT_shifted, clevs, norm = norm, extend='both', cmap = my_cmap)
         lines = map.contour(x, y, highpv_hgt_shifted, levels = [-30, -25, -20, -15, -10,-5, 5, 10, 15, 20, 25, 30], colors = 'black')
         plt.clabel(lines)
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [48, 30], lon_range = [256.5, 268.5], grid_space = 1.5, lw = 2, color = 'purple')
+        #p1, p2, p3, p4 = DrawPolygon(map, lat_range = [48, 30], lon_range = [256.5, 268.5], grid_space = 1.5, lw = 2, color = 'purple')
         ax.set_title(f"{labels[i+3]} {dates_select[i].strftime('%Y/%m/%d')}", fontsize = 14, weight = 'bold')
         plt.tight_layout()
 
@@ -306,7 +306,7 @@ cb_ax = fig.add_axes([0.05, -0.03, 0.91, 0.04])
 cbar = fig.colorbar(cs, cax=cb_ax,orientation="horizontal",ticks= np.arange(-10, 12, 2),extend="both")
 cbar.set_label("T2M Anomaly ($^\circ$C)", fontsize = 16)
 cbar.ax.tick_params(labelsize=13)
-plt.savefig(f'/share/data1/Students/ollie/CAOs/project-2021-cao/main/S2S_Models/PV_Maps/Wave_Break_Reverse/ECMWF/test_{date_str}_greenland_t2m_ecmwf_95.png', bbox_inches = 'tight', dpi = 500)
+plt.savefig(f'/share/data1/Students/ollie/CAOs/project-2021-cao/main/S2S_Models/PV_Maps/Wave_Break_Reverse/ECMWF/test_{date_str}_greenland_t2m_ecmwf.png', bbox_inches = 'tight', dpi = 500)
 
 
 # Plot the PV patterns out too!
