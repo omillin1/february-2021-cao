@@ -60,7 +60,7 @@ t2m_ltm_region_ncep = ltm_t2m_ncep[:, :, ltm_lat_ind1:ltm_lat_ind2+1, ltm_lon_in
 
 ###### Read in the ECMWF surfT data from the model forecasts. ######
 # Go to directory for ensemble of ECMWF T2M data.
-dir = '/data/deluge/scratch/S2S/realtime/ECMWF/surfT'
+dir = '/data/deluge/models/S2S/realtime/ECMWF/surfT'
 path = os.chdir(dir)
 
 # Open one data file for parameters.
@@ -87,7 +87,7 @@ cold_end = datetime(2021, 2, 18, 0, 0)
 
 # Do perturbation indexing for ECMWF.
 # Get all filenames that feature "perturbed.nc" and sort them.
-model_dir_pert = '/data/deluge/scratch/S2S/realtime/ECMWF/surfT/*perturbed.nc'
+model_dir_pert = '/data/deluge/models/S2S/realtime/ECMWF/surfT/*perturbed.nc'
 files_pert = glob.glob(model_dir_pert)
 files_pert.sort()
 # Now split the names into strings of just the init date form "YYYY-MM-DD".
@@ -98,7 +98,7 @@ pert_ind2 = model_dates_pert.index(date_end)
 
 # Do control indexing for ECMWF.
 # Get all filenames that feature "control.nc" and sort them.
-model_dir_con = '/data/deluge/scratch/S2S/realtime/ECMWF/surfT/*control.nc'
+model_dir_con = '/data/deluge/models/S2S/realtime/ECMWF/surfT/*control.nc'
 files_con = glob.glob(model_dir_con)
 files_con.sort()
 # Now split the names into strings of just the init date form "YYYY-MM-DD".
@@ -143,7 +143,7 @@ for i in range(con_ind1, con_ind2+1):
 
 ###### Read in the NCEP surfT data from the model forecasts. ######
 # Go to directory for ensemble of NCEP T2M data.
-dir = '/data/deluge/scratch/S2S/realtime/NCEP/surfT'
+dir = '/data/deluge/models/S2S/realtime/NCEP/surfT'
 path = os.chdir(dir)
 
 # Open one data file for parameters.
@@ -307,7 +307,7 @@ ax.plot(np.arange(1, len(date_ticks)+1), prob_arr_ncep*100, lw = 2, color = 'dar
 # Set plot parameters.
 plt.title(f'a) Extreme Event Probability')
 plt.xticks(np.arange(1, len(date_ticks)+1), date_ticks, rotation = 30)
-plt.xlabel('Initialization Date (M/DD)', fontsize = 10, weight = 'bold')
+plt.xlabel('Initialization Date (Month/Day)', fontsize = 10, weight = 'bold')
 plt.ylabel('Probability of Extreme Event (%)', fontsize = 9, weight = 'bold')
 plt.yticks(np.arange(0, 120, 20))
 ax.yaxis.set_minor_locator(MultipleLocator(5))
