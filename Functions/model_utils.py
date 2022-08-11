@@ -92,11 +92,9 @@ def Extreme_T2M_Thresholds_HC(model = 'ECWMF', init = '01-04', lat_range = [90, 
     for f in range(len(pert_files)):
         nc_pert = Dataset(pert_files[f], 'r')
         pert_data = nc_pert.variables['t2m'][:, :, lat_ind1:lat_ind2+1, lon_ind1:lon_ind2+1]
-        pert_data = np.where(pert_data.mask, np.nan, pert_data.data)
         nc_pert.close()
         nc_con = Dataset(con_files[f], 'r')
         con_data = nc_con.variables['t2m'][:, lat_ind1:lat_ind2+1, lon_ind1:lon_ind2+1]
-        con_data = np.where(con_data.mask, np.nan, con_data.data)
         nc_con.close()
         data_store[f] = np.concatenate((con_data[:, None, :, :], pert_data), axis = 1)
 
