@@ -32,7 +32,7 @@ ltm_t2m_ecmwf = nc.variables['surfT'][:]
 # Close file.
 nc.close()
 
-###### Read in LTM data for T2M ECMWF. ######
+###### Read in LTM data for T2M NCEP. ######
 # Go to file directory.
 dir = '/share/data1/Students/ollie/CAOs/Data/Feb_2021_CAO/Model_Data/NCEP/surfT'
 path = os.chdir(dir)
@@ -119,6 +119,7 @@ time_init_ecmwf = []
 for i in range(pert_ind1, pert_ind2+1):
     # Get filename.
     pert_filename = files_pert[i]
+    print(pert_filename)
     # Open file.
     nc = Dataset(pert_filename, 'r')
     # Load time and perturbed t2m data.
@@ -134,6 +135,7 @@ for i in range(pert_ind1, pert_ind2+1):
 for i in range(con_ind1, con_ind2+1):
     # Get filename.
     con_filename = files_con[i]
+    print(con_filename)
     # Open file.
     nc = Dataset(con_filename, 'r')
     # Load control t2m data.
@@ -168,6 +170,7 @@ files_con_select = model_dates_con[con_ind1:con_ind2+1]
 for i in range(len(files_pert_select)):
     # Get filename.
     pert_filename = f'NCEP_surfT_{files_pert_select[i]}_perturbed.nc'
+    print(pert_filename)
     # Open file.
     nc = Dataset(pert_filename, 'r')
     # Load time and perturbed NCEP t2m.
@@ -183,6 +186,7 @@ for i in range(len(files_pert_select)):
 for i in range(len(files_con_select)):
     # Get filename.
     con_filename = f'NCEP_surfT_{files_con_select[i]}_control.nc'
+    print(con_filename)
     # Open file.
     nc = Dataset(con_filename, 'r')
     # Get control t2m ncep data.
