@@ -111,6 +111,7 @@ time_init = []
 for i in range(pert_ind1, pert_ind2+1):
     # Get filename.
     pert_filename = files_pert[i]
+    print(pert_filename)
     # Open file.
     nc = Dataset(pert_filename, 'r')
     # Get the time.
@@ -127,6 +128,7 @@ for i in range(pert_ind1, pert_ind2+1):
 for i in range(con_ind1, con_ind2+1):
     # Get filename.
     con_filename = files_con[i]
+    print(con_filename)
     # Open file.
     nc = Dataset(con_filename, 'r')
     # Read in the data.
@@ -181,7 +183,7 @@ for i in range(all_members_final.shape[0]):
 clusters = np.zeros((pc_ens.shape[0],pc_ens.shape[1]))
 # Loop through each init and essentially use k-means to assign the cluster to each ensemble member.
 for i in range(clusters.shape[0]):
-	clusters[i,:] = kmeans.predict(pc_ens[i,:])
+	clusters[i,:] = kmeans.predict(pc_ens[i])
 
 
 ###### Make a plot of a certain regime number. ######
@@ -239,9 +241,6 @@ for i in range(len(time_init)):
 	arh_count[i] = np.count_nonzero(clusters[i] == 3)
 	arl_count[i] = np.count_nonzero(clusters[i] == 4)
 
-
-# Create color list for each regime.
-colors = ['darkgreen', 'darkblue', 'darkorange', 'darkred', 'darkpurple']
 # Get labels for plot in correct form "M-DD".
 labels = [f'{i.month}/{i.day}' for i in time_init]
 # Make the plot!
