@@ -14,7 +14,7 @@ from tqdm import tqdm
 dir = '/share/data1/Students/ollie/CAOs/project-2021-cao/Functions'
 path = os.chdir(dir)
 from gen_utils import DrawPolygon, LambConfMap, NormColorMap, NPStere_Map
-from model_utils import load_latlon, load_modelparam
+from model_utils import load_latlon, load_modelparam, load_model_ltm_2D, load_model_ltm_3D
 
 ###### READ IN PV DATA ######
 # Pick init date to read in.
@@ -119,23 +119,9 @@ all_surfT = np.concatenate((surfT_con[:, None, :, :], surfT_pert), axis = 1)
 # Go to T2M climo directory.
 dir = '/share/data1/Students/ollie/CAOs/Data/Feb_2021_CAO/Model_Data/NCEP/surfT'
 path = os.chdir(dir)
-# Open the data file for T2M ECMWF climo.
-nc = Dataset('climo_NCEP_surfT_hindcast.nc', 'r')
-# Read in lat, lon.
-ltm_latitude, ltm_longitude = load_latlon(nc)
-# Read in hindcast dates, days array.
-ltm_dates = num2date(nc.variables['hdates'][:], nc.variables['hdates'].units, calendar = 'gregorian', only_use_cftime_datetimes=False, only_use_python_datetimes=True)
-ltm_days = nc.variables['days'][:]
-# Read in the whole T2M ltm data.
-ltm_surfT = nc.variables['surfT'][:] # Shape (init date, lead time, lat, lon)
-# Close file.
-nc.close()
-
-# Find lat, lon inds for T2M ltm.
-ltm_lat_ind1, ltm_lat_ind2 = np.where(ltm_latitude == lat1)[0][0], np.where(ltm_latitude == lat2)[0][0]
-ltm_lon_ind1, ltm_lon_ind2 = np.where(ltm_longitude == lon1)[0][0], np.where(ltm_longitude == lon2)[0][0]
-# Now restrict T2M ltm spatially to the same regions are your real-time array.
-surfT_ltm_region = ltm_surfT[:, 1:, ltm_lat_ind1:ltm_lat_ind2+1, ltm_lon_ind1:ltm_lon_ind2+1]
+# Read in T2M ltm data and parameters
+ltm_latitude, ltm_longitude, ltm_dates, ltm_days, surfT_ltm_region = load_model_ltm_2D('NCEP', 'surfT', [lat1, lat2], [lon1, lon2])
+surfT_ltm_region = surfT_ltm_region[:, 1:] # To correct to the same shape as realtime.
 
 
 ###### CALCULATE T2M ANOMALIES ######
@@ -153,26 +139,10 @@ level = 500
 # Go to hgt ltm directory.
 dir = '/share/data1/Students/ollie/CAOs/Data/Feb_2021_CAO/Model_Data/NCEP/hgt'
 path = os.chdir(dir)
-# Open the file for hgt ltm.
-nc = Dataset('climo_NCEP_hgt_hindcast.nc', 'r')
-# Load lat, lons.
-ltm_latitude_hgt, ltm_longitude_hgt = load_latlon(nc)
-# Load levels.
-ltm_levels_hgt = nc.variables['level'][:]
-# Load in the ltm dates, the days array, and the ltm hgt array itself.
-ltm_dates_hgt = num2date(nc.variables['hdates'][:], nc.variables['hdates'].units, calendar = 'gregorian', only_use_cftime_datetimes=False, only_use_python_datetimes=True)
-ltm_days_hgt = nc.variables['days'][:]
-ltm_hgt = nc.variables['hgt'][:] # Shape (init date, lead time, level, lat, lon)
-# Close file.
-nc.close()
-
-# Now find indices of the N Hemi lat and lon.
-ltm_lat_ind1_hgt, ltm_lat_ind2_hgt = np.where(ltm_latitude_hgt == lat1)[0][0], np.where(ltm_latitude_hgt == lat2)[0][0]
-ltm_lon_ind1_hgt, ltm_lon_ind2_hgt = np.where(ltm_longitude_hgt == lon1)[0][0], np.where(ltm_longitude_hgt == lon2)[0][0]
-# Find level index.
-level_ind = np.where(ltm_levels_hgt == level)[0][0]
-# Restrict hgt ltm to the region desired.
-hgt_ltm_region = ltm_hgt[:, :, level_ind, ltm_lat_ind1_hgt:ltm_lat_ind2_hgt+1, ltm_lon_ind1_hgt:ltm_lon_ind2_hgt+1]
+# Read in T2M ltm data and parameters
+ltm_latitude_hgt, ltm_longitude_hgt, ltm_levels_hgt, ltm_dates_hgt, ltm_days_hgt, hgt_ltm_region = load_model_ltm_3D('NCEP', 'hgt', [lat1, lat2], [lon1, lon2], level = level)
+# Set level index.
+level_ind = np.where(ltm_levels_hgt == 500)[0][0]
 
 ###### READ IN HGT DATA ######
 # Go to real-time directory for hgt.

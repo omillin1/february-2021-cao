@@ -41,6 +41,76 @@ def load_modelparam(nc):
     start_time = day_init[0]
     return day_init, number, start_time
 
+def load_model_ltm_2D(model = 'ECMWF', param = 'surfT', lat_bounds = [90, 9], lon_bounds = [0, 358.5]):
+    """Loads in ltm S2S model data for given lat, lon bounds.
+
+    Parameters
+    ---------
+    nc: The netCDF4.Dataset read object for the nc file.
+
+    Returns
+    ---------
+    ltm_latitude: Array of floats for latitude.
+    ltm_longitude: Array of floats for longitude.
+    ltm_dates: Array of python datetimes representing the initialization dates of the hindcast climo.
+    ltm_days: Array of python integers representing the days in the forecast.
+    ltm_region: Array of the 2D variable restricted to lat and lon bounds.
+    """
+    # Open the data file for the climo.
+    nc = Dataset(f'climo_{model}_{param}_hindcast.nc', 'r')
+    # Read in lat, lon.
+    ltm_latitude, ltm_longitude = load_latlon(nc)
+    # Read in hindcast dates, days array.
+    ltm_dates = num2date(nc.variables['hdates'][:], nc.variables['hdates'].units, calendar = 'gregorian', only_use_cftime_datetimes=False, only_use_python_datetimes=True)
+    ltm_days = nc.variables['days'][:]
+    # Read in the ltm data.
+    ltm_var = nc.variables[param][:] # Shape (init date, lead time, lat, lon)
+    # Close file.
+    nc.close()
+    # Find lat, lon inds for ltm.
+    ltm_lat_ind1, ltm_lat_ind2 = np.where(ltm_latitude == lat_bounds[0])[0][0], np.where(ltm_latitude == lat_bounds[1])[0][0]
+    ltm_lon_ind1, ltm_lon_ind2 = np.where(ltm_longitude == lon_bounds[0])[0][0], np.where(ltm_longitude == lon_bounds[1])[0][0]
+    # Now restrict ltm spatially to the lat, lon regions.
+    ltm_region = ltm_var[:, :, ltm_lat_ind1:ltm_lat_ind2+1, ltm_lon_ind1:ltm_lon_ind2+1]
+    return ltm_latitude, ltm_longitude, ltm_dates, ltm_days, ltm_region
+
+def load_model_ltm_3D(model = 'ECMWF', param = 'hgt', lat_bounds = [90, 9], lon_bounds = [0, 358.5], level = 500):
+    """Loads in ltm latitudes, longitudes, hindcast dates, days array and the ltm variable for S2S models.
+
+    Parameters
+    ---------
+    nc: The netCDF4.Dataset read object for the nc file.
+
+    Returns
+    ---------
+    ltm_latitude: Array of floats for latitude.
+    ltm_longitude: Array of floats for longitude.
+    ltm_levels: Array of floats for pressure levels.
+    ltm_dates: Array of python datetimes representing the initialization dates of the hindcast climo.
+    ltm_days: Array of python integers representing the days in the forecast.
+    ltm_var: Array of the 3D variable restricted to lat, lon, and level bounds.
+    """
+    # Open the data file for the climo.
+    nc = Dataset(f'climo_{model}_{param}_hindcast.nc', 'r')
+    # Read in lat, lon.
+    ltm_latitude, ltm_longitude = load_latlon(nc)
+    ltm_levels = nc.variables['level'][:]
+    # Read in hindcast dates, days array.
+    ltm_dates = num2date(nc.variables['hdates'][:], nc.variables['hdates'].units, calendar = 'gregorian', only_use_cftime_datetimes=False, only_use_python_datetimes=True)
+    ltm_days = nc.variables['days'][:]
+    # Read in the ltm data.
+    ltm_var = nc.variables[param][:] # Shape (init date, lead time, lat, lon)
+    # Close file.
+    nc.close()
+    # Find lat, lon inds for ltm.
+    ltm_lat_ind1, ltm_lat_ind2 = np.where(ltm_latitude == lat_bounds[0])[0][0], np.where(ltm_latitude == lat_bounds[1])[0][0]
+    ltm_lon_ind1, ltm_lon_ind2 = np.where(ltm_longitude == lon_bounds[0])[0][0], np.where(ltm_longitude == lon_bounds[1])[0][0]
+    # Find level index.
+    level_ind = np.where(ltm_levels == level)[0][0]
+    # Restrict ltm to the region desired.
+    ltm_region = ltm_var[:, :, level_ind, ltm_lat_ind1:ltm_lat_ind2+1, ltm_lon_ind1:ltm_lon_ind2+1]
+    return ltm_latitude, ltm_longitude, ltm_levels, ltm_dates, ltm_days, ltm_region
+
 # Write a function for this.
 def Extreme_T2M_Thresholds_HC(model = 'ECWMF', init = '01-04', lat_range = [90, 0], lon_range = [0, 358.5], perc = 5):
     """Calculates lead-dependent extreme event thresholds in the T2M field from a hindcast climatology at a given initialisation.
