@@ -139,7 +139,7 @@ path = os.chdir(dir)
 # Read in T2M ltm data and parameters
 ltm_latitude_hgt, ltm_longitude_hgt, ltm_levels_hgt, ltm_dates_hgt, ltm_days_hgt, hgt_ltm_region = load_model_ltm_3D('ECMWF', 'hgt', [lat1, lat2], [lon1, lon2], level = level)
 # Set level index.
-level_ind = np.where(ltm_levels_hgt == 500)[0][0]
+level_ind = np.where(ltm_levels_hgt == level)[0][0]
 
 ###### READ IN HGT DATA ######
 # Go to real-time directory for hgt.
