@@ -1,4 +1,6 @@
 ###### Import modules/functions. ######
+import sys
+sys.path.insert(4, '../')
 import numpy as np
 from netCDF4 import Dataset, num2date
 import os
@@ -11,52 +13,26 @@ from scipy import stats
 from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,
                                AutoMinorLocator)
 import re
-# Import pre-written functions.
-dir = '/share/data1/Students/ollie/CAOs/project-2021-cao/Functions'
-path = os.chdir(dir)
-from model_utils import Extreme_T2M_Thresholds_HC, load_latlon, load_modelparam
-
-###### Read in LTM data for T2M ECMWF. ######
-# Go to file directory.
-dir = '/share/data1/Students/ollie/CAOs/Data/Feb_2021_CAO/Model_Data/ECMWF/surfT'
-path = os.chdir(dir)
-# Read in the file.
-nc = Dataset('climo_ECMWF_surfT_hindcast.nc', 'r')
-# Load lat and lon.
-ltm_latitude, ltm_longitude = load_latlon(nc)
-# Load the initialization dates and number of days.
-ltm_dates_ecmwf = num2date(nc.variables['hdates'][:], nc.variables['hdates'].units, calendar = 'gregorian', only_use_cftime_datetimes=False, only_use_python_datetimes=True)
-ltm_days_ecmwf = nc.variables['days'][:]
-# Load ltm T2M data.
-ltm_t2m_ecmwf = nc.variables['surfT'][:]
-# Close file.
-nc.close()
-
-###### Read in LTM data for T2M NCEP. ######
-# Go to file directory.
-dir = '/share/data1/Students/ollie/CAOs/Data/Feb_2021_CAO/Model_Data/NCEP/surfT'
-path = os.chdir(dir)
-# Read in the file.
-nc = Dataset('climo_NCEP_surfT_hindcast.nc', 'r')
-# Load the initialization dates and number of days.
-ltm_dates_ncep = num2date(nc.variables['hdates'][:], nc.variables['hdates'].units, calendar = 'gregorian', only_use_cftime_datetimes=False, only_use_python_datetimes=True)
-ltm_days_ncep = nc.variables['days'][1:] # Omit first day NCEP data does not include init day like ECMWF.
-# Load ltm T2M data.
-ltm_t2m_ncep = nc.variables['surfT'][:, 1:] # Omit first day because surfT NCEP data does not include init day like ECMWF.
-nc.close()
+from Functions import model_utils
 
 ###### Select bounds and indices for latitude/longitude.
 # Select lat/lon bounds for the Great Plains.
 lat1, lat2 = 48, 30
 lon1, lon2 = 256.5, 268.5
 
-# Now get latitude and longitude indices for ECMWF and NCEP.
-ltm_lat_ind1, ltm_lat_ind2 = np.where(ltm_latitude == lat1)[0][0], np.where(ltm_latitude == lat2)[0][0]
-ltm_lon_ind1, ltm_lon_ind2 = np.where(ltm_longitude == lon1)[0][0], np.where(ltm_longitude == lon2)[0][0]
+###### Read in LTM data for T2M ECMWF. ######
+# Go to file directory.
+dir = '/share/data1/Students/ollie/CAOs/Data/Feb_2021_CAO/Model_Data/ECMWF/surfT'
+path = os.chdir(dir)
+# Read in data.
+ltm_latitude, ltm_longitude, ltm_dates_ecmwf, ltm_days_ecmwf, t2m_ltm_region_ecmwf = model_utils.load_model_ltm_2D('ECMWF', 'surfT', [lat1, lat2], [lon1, lon2])
 
-# Restrict the ltm in ECMWF and NCEP to the Great Plains region.
-t2m_ltm_region_ecmwf = ltm_t2m_ecmwf[:, :, ltm_lat_ind1:ltm_lat_ind2+1, ltm_lon_ind1:ltm_lon_ind2+1]
-t2m_ltm_region_ncep = ltm_t2m_ncep[:, :, ltm_lat_ind1:ltm_lat_ind2+1, ltm_lon_ind1:ltm_lon_ind2+1]
+###### Read in LTM data for T2M NCEP. ######
+# Go to file directory.
+dir = '/share/data1/Students/ollie/CAOs/Data/Feb_2021_CAO/Model_Data/NCEP/surfT'
+path = os.chdir(dir)
+# Read in data.
+ltm_dates_ncep, ltm_days_ncep, t2m_ltm_region_ncep = model_utils.load_model_ltm_2D('NCEP', 'surfT', [lat1, lat2], [lon1, lon2])[2:]
 
 ###### Read in the ECMWF surfT data from the model forecasts. ######
 # Go to directory for ensemble of ECMWF T2M data.
@@ -66,8 +42,8 @@ path = os.chdir(dir)
 # Open one data file for parameters.
 filename = 'ECMWF_surfT_2021-01-04_perturbed.nc'
 nc = Dataset(filename, 'r')
-time_ecmwf, number_ecmwf = load_modelparam(nc)[0], load_modelparam(nc)[1]
-mod_latitude, mod_longitude = load_latlon(nc)
+time_ecmwf, number_ecmwf = model_utils.load_modelparam(nc)[0], model_utils.load_modelparam(nc)[1]
+mod_latitude, mod_longitude = model_utils.load_latlon(nc)
 nc.close()
 
 # Set model lat and lon.
@@ -86,26 +62,7 @@ cold_start = datetime(2021, 2, 12, 0, 0)
 cold_end = datetime(2021, 2, 18, 0, 0)
 
 # Do perturbation indexing for ECMWF.
-# Get all filenames that feature "perturbed.nc" and sort them.
-model_dir_pert = '/data/deluge/models/S2S/realtime/ECMWF/surfT/*perturbed.nc'
-files_pert = glob.glob(model_dir_pert)
-files_pert.sort()
-# Now split the names into strings of just the init date form "YYYY-MM-DD".
-model_dates_pert = [i.split("_")[2] for i in files_pert]
-# Find indices where our selected init date limit lie within the strings.
-pert_ind1 = model_dates_pert.index(date_init)
-pert_ind2 = model_dates_pert.index(date_end)
-
-# Do control indexing for ECMWF.
-# Get all filenames that feature "control.nc" and sort them.
-model_dir_con = '/data/deluge/models/S2S/realtime/ECMWF/surfT/*control.nc'
-files_con = glob.glob(model_dir_con)
-files_con.sort()
-# Now split the names into strings of just the init date form "YYYY-MM-DD".
-model_dates_con = [i.split("_")[2] for i in files_con]
-# Find indices where our selected init date limit lie within the strings.
-con_ind1 = model_dates_con.index(date_init)
-con_ind2 = model_dates_con.index(date_end)
+files_pert, files_con, pert_ind1, pert_ind2, con_ind1, con_ind2, model_dates_pert, model_dates_con = model_utils.sort_file_realtime([date_init, date_end], 'ECMWF', 'surfT')
 
 # Now get the ECMWF perturbed and control arrays to put data into. Perturbed will be shaped INIT NO. x time x number x lat x lon.
 # Control will be shaped INIT NO. x time x lat x lon.
@@ -123,7 +80,7 @@ for i in range(pert_ind1, pert_ind2+1):
     # Open file.
     nc = Dataset(pert_filename, 'r')
     # Load time and perturbed t2m data.
-    time_pert_ecmwf = load_modelparam(nc)[0]
+    time_pert_ecmwf = model_utils.load_modelparam(nc)[0]
     perturbed_t2m_ecmwf[i-pert_ind1, :, :, :, :] = nc.variables['t2m'][:, :, mod_lat_ind1:mod_lat_ind2+1, mod_lon_ind1:mod_lon_ind2+1]
     # Close file.
     nc.close()
@@ -151,13 +108,13 @@ path = os.chdir(dir)
 # Open one data file for parameters.
 filename = 'NCEP_surfT_2021-01-04_perturbed.nc'
 nc = Dataset(filename, 'r')
-time_ncep, number_ncep = load_modelparam(nc)[0], load_modelparam(nc)[1]
+time_ncep, number_ncep = model_utils.load_modelparam(nc)[0], model_utils.load_modelparam(nc)[1]
 nc.close()
 
 # Now get the NCEP perturbed and control arrays to put data into. Perturbed will be shaped INIT NO. x time x number x lat x lon.
 # Control will be shaped INIT NO. x time x lat x lon.
-perturbed_t2m_ncep = np.zeros((pert_ind2-pert_ind1+1, len(ltm_days_ncep), len(number_ncep), len(mod_region_lat), len(mod_region_lon)))
-control_t2m_ncep = np.zeros((con_ind2-con_ind1+1, len(ltm_days_ncep), len(mod_region_lat), len(mod_region_lon)))
+perturbed_t2m_ncep = np.zeros((pert_ind2-pert_ind1+1, len(ltm_days_ncep)-1, len(number_ncep), len(mod_region_lat), len(mod_region_lon)))
+control_t2m_ncep = np.zeros((con_ind2-con_ind1+1, len(ltm_days_ncep)-1, len(mod_region_lat), len(mod_region_lon)))
 # The lists below will be to append time and init date data too.
 time_arr_ncep = []
 time_init_ncep = []
@@ -174,7 +131,7 @@ for i in range(len(files_pert_select)):
     # Open file.
     nc = Dataset(pert_filename, 'r')
     # Load time and perturbed NCEP t2m.
-    time_pert_ncep = load_modelparam(nc)[0]
+    time_pert_ncep = model_utils.load_modelparam(nc)[0]
     perturbed_t2m_ncep[i, :, :, :, :] = nc.variables['t2m'][:, :, mod_lat_ind1:mod_lat_ind2+1, mod_lon_ind1:mod_lon_ind2+1]
     # Close file.
     nc.close()
@@ -220,7 +177,7 @@ for i in range(len(time_init_ecmwf)):
 
 # Get anomalies for NCEP by looping through each init time and finding where the days and months tracker meets that of the ltm file.
 for i in range(len(time_init_ncep)):
-    t2m_anom_ncep[i] = (all_members_t2m_ncep[i] - t2m_ltm_region_ncep[np.where((months_ltm_ncep == time_init_ncep[i].month)&(days_ltm_ncep == time_init_ncep[i].day))[0][0], :, None, :, :])
+    t2m_anom_ncep[i] = (all_members_t2m_ncep[i] - t2m_ltm_region_ncep[np.where((months_ltm_ncep == time_init_ncep[i].month)&(days_ltm_ncep == time_init_ncep[i].day))[0][0], 1:, None, :, :]) # index 1 to avoid the start day as in real time.
 
 ###### Find extreme T2M event thresholds. ######
 
@@ -231,8 +188,8 @@ threshold_region_ecmwf = np.zeros((len(init_dates),len(time_ecmwf), len(mod_regi
 threshold_region_ncep = np.zeros((len(init_dates),len(time_ncep)+1, len(mod_region_lat), len(mod_region_lon)))
 # Now loop through each init date and find the extreme event threshold using the pre-defined function in this code.
 for i in range(len(init_dates)):
-    threshold_region_ecmwf[i] = Extreme_T2M_Thresholds_HC('ECMWF', init_dates[i], [lat1, lat2], [lon1, lon2], perc = 10)[0]
-    threshold_region_ncep[i] = Extreme_T2M_Thresholds_HC('NCEP', init_dates[i], [lat1, lat2], [lon1, lon2], perc = 10)[0]
+    threshold_region_ecmwf[i] = model_utils.Extreme_T2M_Thresholds_HC('ECMWF', init_dates[i], [lat1, lat2], [lon1, lon2], perc = 10)[0]
+    threshold_region_ncep[i] = model_utils.Extreme_T2M_Thresholds_HC('NCEP', init_dates[i], [lat1, lat2], [lon1, lon2], perc = 10)[0]
 
 # Now adjust the ncep thresholds to get rid of the first day as in real-time data.
 threshold_region_ncep = threshold_region_ncep[:, 1:]
@@ -271,33 +228,11 @@ all_members_final_ecmwf, all_members_final_ncep = np.nanmean(all_members_lat_ecm
 
 # Set temp array to fit distribution.
 dist_temps = np.round(np.arange(-20, 20.1, 0.1),3)
-# Define NCEP and ECMWF probability arrays.
-prob_arr_ncep = np.zeros(len(time_init_ncep))
-prob_arr_ecmwf = np.zeros(len(time_init_ecmwf))
 
-# Loop through each init time, fit a normal distribution and find where cumulative function hits the threshold.
 # Find ECMWF probabilities.
-for i in range(len(time_init_ecmwf)):
-    # Get the mean and standard deviation of each run.
-    mean_member_ecmwf = np.nanmean(all_members_final_ecmwf[i, :])
-    std_member_ecmwf = np.nanstd(all_members_final_ecmwf[i, :])
-    # Fit normal distribution (cumulative) to data.
-    norm_dist_ecmwf = stats.norm.cdf(dist_temps, loc =  mean_member_ecmwf, scale= std_member_ecmwf)
-    # Find the point where your temp array for the distribition meets the extreme threshold for that run.
-    cond_extreme_ecmwf = np.where(dist_temps == np.round(extreme_thresh_all_ecmwf[i], 1))[0][0]
-    # Use the condition above to find the cumulative probability of <=10% extreme threshold! Store.
-    prob_arr_ecmwf[i] = norm_dist_ecmwf[cond_extreme_ecmwf]
-
+prob_arr_ecmwf = model_utils.calc_prob_extreme(all_members_final_ecmwf, dist_temps, extreme_thresh_all_ecmwf)
 # Find NCEP probabilities.
-for i in range(len(time_init_ncep)):
-    mean_member_ncep = np.nanmean(all_members_final_ncep[i, :])
-    std_member_ncep = np.nanstd(all_members_final_ncep[i, :])
-    # Fit normal distribution (cumulative) to data.
-    norm_dist_ncep = stats.norm.cdf(dist_temps, loc =  mean_member_ncep, scale= std_member_ncep)
-    # Find the point where your temp array for the distribition meets the extreme threshold for that run.
-    cond_extreme_ncep = np.where(dist_temps == np.round(extreme_thresh_all_ncep[i], 1))[0][0]
-    # Use the condition above to find the cumulative probability of <=10% extreme threshold! Store.
-    prob_arr_ncep[i] = norm_dist_ncep[cond_extreme_ncep]
+prob_arr_ncep = model_utils.calc_prob_extreme(all_members_final_ncep, dist_temps, extreme_thresh_all_ncep)
 
 # Set some ticks for the dates in 'M/DD' format.
 date_ticks = [f'{i.month}/{i.day}' for i in time_init_ecmwf]

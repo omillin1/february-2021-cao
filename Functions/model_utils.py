@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 from glob import glob
 import re
+from scipy import stats
 
 def load_latlon(nc):
     """Loads in the latitudes and longitudes for S2S models.
@@ -177,3 +178,77 @@ def Extreme_T2M_Thresholds_HC(model = 'ECWMF', init = '01-04', lat_range = [90, 
     thresh_array = np.percentile(anom_hc, q = perc, axis = (0, 2))
 
     return thresh_array, start_time
+
+def sort_file_realtime(inits = ['2021-01-14', '2021-02-11'], model = 'ECMWF', var = 'surfT'):
+    """Calculates positional indices for realtime initializations in a list of filenames and outputs the sorted filenames
+
+    Parameters
+    ----------
+    inits: list containing two strings for the first and last initialization dates required.
+    model: string containing the name of the model.
+    var: string containing the name of the variable.
+
+    Returns
+    ----------
+    files_pert: list of perturbed realtime filenames.
+    files_con: list of control realtime filenames.
+    pert_ind1: index of first initialization in files_pert.
+    pert_ind2: index of second initialization in files_pert.
+    con_ind1: index of first initialization in files_con.
+    con_ind2: index of second initialization in files_con.
+    model_dates_pert: list of all perturbed model run dates.
+    model_dates_con: list of all control model run dates.
+    """
+    # Do perturbation indexing.
+    # Get all filenames that feature "perturbed.nc" and sort them.
+    model_dir_pert = f'/data/deluge/models/S2S/realtime/{model}/{var}/*perturbed.nc'
+    files_pert = glob(model_dir_pert)
+    files_pert.sort()
+    # Now split the names into strings of just the init date form "YYYY-MM-DD".
+    model_dates_pert = [i.split("_")[2] for i in files_pert]
+    # Find indices where our selected init date limit lie within the strings.
+    pert_ind1 = model_dates_pert.index(inits[0])
+    pert_ind2 = model_dates_pert.index(inits[1])
+
+    # Do control indexing for ECMWF.
+    # Get all filenames that feature "control.nc" and sort them.
+    model_dir_con = f'/data/deluge/models/S2S/realtime/{model}/{var}/*control.nc'
+    files_con = glob(model_dir_con)
+    files_con.sort()
+    # Now split the names into strings of just the init date form "YYYY-MM-DD".
+    model_dates_con = [i.split("_")[2] for i in files_con]
+    # Find indices where our selected init date limit lie within the strings.
+    con_ind1 = model_dates_con.index(inits[0])
+    con_ind2 = model_dates_con.index(inits[1])
+
+    return files_pert, files_con, pert_ind1, pert_ind2, con_ind1, con_ind2, model_dates_pert, model_dates_con
+
+def calc_prob_extreme(data, x, thresholds):
+    """Calculates probability of an extreme cold T2M anomaly event based on fitting a cumulative normal distribution and
+    finding where the predicted T2M anomaly crosses the extreme event threshold.
+
+    Parameters
+    ----------
+    data: 2D array, shape (time init, ens no.), contains the area-averaged forecasted T2M anomaly for a target period at each initialization.
+    x: 1D array, contains the temperature range to fit the distribution to to 1dp.
+    thresholds: 1D array, shape (timie init,), contains the area-averaged extreme event threshold for the period in question.
+
+    Returns
+    ----------
+    prob_arr: 1D array, shape (time init,), contains the probability of the extreme cold event at a given initialization.
+    """
+    # Define the probability array.
+    prob_arr = np.zeros(data.shape[0])
+    # Loop through each init time, fit a normal distribution and find where cumulative function hits the threshold.
+    for i in range(data.shape[0]):
+        # Get the mean and standard deviation of each run ensemble spread.
+        mean_member = np.nanmean(data[i, :])
+        std_member = np.nanstd(data[i, :])
+        # Fit normal distribution (cumulative) to data.
+        norm_dist = stats.norm.cdf(x, loc =  mean_member, scale= std_member)
+        # Find the point where your temp array for the distribition meets the extreme threshold for that run.
+        cond_extreme = np.where(x == np.round(thresholds[i], 1))[0][0]
+        # Use the condition above to find the cumulative probability of <=10% extreme threshold! Store.
+        prob_arr[i] = norm_dist[cond_extreme]
+
+    return prob_arr
