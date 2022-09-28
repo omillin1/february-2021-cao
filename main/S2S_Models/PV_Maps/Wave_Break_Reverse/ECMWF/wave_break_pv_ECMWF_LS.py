@@ -1,4 +1,6 @@
 ###### IMPORT MODULES ######
+import sys
+sys.path.insert(5, '../')
 import numpy as np
 from netCDF4 import Dataset, num2date
 from datetime import datetime, timedelta
@@ -11,10 +13,7 @@ from matplotlib.dates import DateFormatter, MonthLocator
 import matplotlib.dates as mdates
 from scipy.stats import percentileofscore
 from tqdm import tqdm
-dir = '/share/data1/Students/ollie/CAOs/project-2021-cao/Functions'
-path = os.chdir(dir)
-from gen_utils import DrawPolygon, LambConfMap, NormColorMap, NPStere_Map
-from model_utils import load_latlon, load_modelparam, load_model_ltm_2D, load_model_ltm_3D
+from Functions import gen_utils, model_utils
 
 ###### READ IN PV DATA ######
 # Pick init date to read in.
@@ -32,12 +31,12 @@ path = os.chdir(dir)
 filename = f'ECMWF_pv_{date_str}_perturbed.nc'
 nc = Dataset(filename, 'r')
 # Read lat/lon.
-mod_latitude, mod_longitude = load_latlon(nc)
+mod_latitude, mod_longitude = model_utils.load_latlon(nc)
 # Now find lat/lon indices to restrict data to.
 lat_ind1, lat_ind2 = np.where(mod_latitude == lat1)[0][0], np.where(mod_latitude == lat2)[0][0]
 lon_ind1, lon_ind2 = np.where(mod_longitude == lon1)[0][0], np.where(mod_longitude == lon2)[0][0]
 # Read in lead time, ensemble number array, and the pv data restricted to spatial domains.
-time, number, init_time = load_modelparam(nc)
+time, number, init_time = model_utils.load_modelparam(nc)
 pv_pert = nc.variables['pv'][:, :, lat_ind1:lat_ind2+1, lon_ind1:lon_ind2+1]
 # Close file.
 nc.close()
@@ -99,7 +98,7 @@ path = os.chdir(dir)
 filename = f'ECMWF_surfT_{date_str}_perturbed.nc'
 nc = Dataset(filename, 'r')
 # Read in time, init time, and T2M data restricted to N Hemi domain.
-time_surfT, init_time_surfT = load_modelparam(nc)[0], load_modelparam(nc)[-1]
+time_surfT, init_time_surfT = model_utils.load_modelparam(nc)[0], model_utils.load_modelparam(nc)[-1]
 surfT_pert = nc.variables['t2m'][:, :, lat_ind1:lat_ind2+1, lon_ind1:lon_ind2+1]
 # Close file.
 nc.close()
@@ -120,7 +119,7 @@ all_surfT = np.concatenate((surfT_con[:, None, :, :], surfT_pert), axis = 1)
 dir = '/share/data1/Students/ollie/CAOs/Data/Feb_2021_CAO/Model_Data/ECMWF/surfT'
 path = os.chdir(dir)
 # Read in T2M ltm data and parameters
-ltm_latitude, ltm_longitude, ltm_dates, ltm_days, surfT_ltm_region = load_model_ltm_2D('ECMWF', 'surfT', [lat1, lat2], [lon1, lon2])
+ltm_latitude, ltm_longitude, ltm_dates, ltm_days, surfT_ltm_region = model_utils.load_model_ltm_2D('ECMWF', 'surfT', [lat1, lat2], [lon1, lon2])
 
 ###### CALCULATE T2M ANOMALIES ######
 # Now set a day and month tracker for the ltm dates.
@@ -137,7 +136,7 @@ level = 500
 dir = '/share/data1/Students/ollie/CAOs/Data/Feb_2021_CAO/Model_Data/ECMWF/hgt'
 path = os.chdir(dir)
 # Read in T2M ltm data and parameters
-ltm_latitude_hgt, ltm_longitude_hgt, ltm_levels_hgt, ltm_dates_hgt, ltm_days_hgt, hgt_ltm_region = load_model_ltm_3D('ECMWF', 'hgt', [lat1, lat2], [lon1, lon2], level = level)
+ltm_latitude_hgt, ltm_longitude_hgt, ltm_levels_hgt, ltm_dates_hgt, ltm_days_hgt, hgt_ltm_region = model_utils.load_model_ltm_3D('ECMWF', 'hgt', [lat1, lat2], [lon1, lon2], level = level)
 # Set level index.
 level_ind = np.where(ltm_levels_hgt == level)[0][0]
 
@@ -150,7 +149,7 @@ path = os.chdir(dir)
 filename = f'ECMWF_hgt_{date_str}_perturbed.nc'
 nc = Dataset(filename, 'r')
 # Read in the lead time, init time.
-time_hgt, init_time_hgt = load_modelparam(nc)[0], load_modelparam(nc)[-1]
+time_hgt, init_time_hgt = model_utils.load_modelparam(nc)[0], model_utils.load_modelparam(nc)[-1]
 # Now read in the hgt perturbed data restricted to the level and domain.
 hgt_pert = nc.variables['gh'][:, :, level_ind, lat_ind1:lat_ind2+1, lon_ind1:lon_ind2+1]
 # Close file
@@ -223,7 +222,7 @@ for i in tqdm(range(len(dates_select))):
 # Set colorbar levels.
 clevs = np.arange(-10, 10.5, 0.5)
 # Create the normalized colormap.
-my_cmap, norm = NormColorMap('RdBu_r', clevs)
+my_cmap, norm = gen_utils.NormColorMap('RdBu_r', clevs)
 # Set significant levels (two-sided)
 perc1, perc2 = 5, 95
 
@@ -250,7 +249,7 @@ for i in tqdm(range(len(dates_select))):
         # Add subplot at given position.
         ax = fig.add_subplot(nrows, ncols, fig_no[i])
         # Set up lambert conformal projection.
-        map = LambConfMap(9000000, 8100000, 1000.0, [35, 75], [55, -100])
+        map = gen_utils.LambConfMap(9000000, 8100000, 1000.0, [35, 75], [55, -100])
         # Map the lons and lats to x and y coordinates.
         x, y = map(lons, lats)
         # Contourf the T2M
@@ -276,7 +275,7 @@ for i in tqdm(range(len(dates_select))):
         # Add subplot at given position.
         ax = fig.add_subplot(nrows, ncols, fig_no[i])
         # Set up lambert conformal projection.
-        map = LambConfMap(9000000, 8100000, 1000.0, [35, 75], [55, -100])
+        map = gen_utils.LambConfMap(9000000, 8100000, 1000.0, [35, 75], [55, -100])
         # Map the lons and lats to x and y coordinates.
         x, y = map(lons, lats)
         # Contourf the T2M
@@ -301,7 +300,7 @@ for i in range(len(dates_select)):
         # Add subplot at given position.
         ax = fig.add_subplot(nrows, ncols, fig_no[i+3])
         # Set up lambert conformal projection.
-        map = LambConfMap(9000000, 8100000, 1000.0, [35, 75], [55, -100])
+        map = gen_utils.LambConfMap(9000000, 8100000, 1000.0, [35, 75], [55, -100])
         # Map the lons and lats to x and y coordinates.
         x, y = map(lons, lats)
         # Contourf the T2M
@@ -323,7 +322,7 @@ for i in range(len(dates_select)):
         # Add subplot at given position.
         ax = fig.add_subplot(nrows, ncols, fig_no[i+3])
         # Set up lambert conformal projection.
-        map = LambConfMap(9000000, 8100000, 1000.0, [35, 75], [55, -100])
+        map = gen_utils.LambConfMap(9000000, 8100000, 1000.0, [35, 75], [55, -100])
         # Map the lons and lats to x and y coordinates.
         x, y = map(lons, lats)
         # Contourf the T2M
@@ -384,7 +383,7 @@ for i in range(len(lat_region)):
 # Set colormap levels for PV difference.
 clevs_pv = np.arange(-5, 5.5, 0.5)
 # Set normalized colormap for PV difference.
-my_cmap, norm = NormColorMap('bwr', clevs_pv)
+my_cmap, norm = gen_utils.NormColorMap('bwr', clevs_pv)
 
 ###### PLOTTING PV ######
 # Set figure size.
@@ -396,7 +395,7 @@ pv_low_shifted, lons_shifted = addcyclic(pv_low, lon_region)
 # Mesh the grid.
 lons, lats = np.meshgrid(lons_shifted, lat_region)
 # Generate the N Hemi map.
-map = NPStere_Map(9, -100)
+map = gen_utils.NPStere_Map(9, -100)
 # Map the lons and lats to x, y coords.
 x, y = map(lons, lats)
 # Contourf  the low PV.
@@ -404,7 +403,7 @@ cs = map.contourf(x, y, pv_low_shifted/1e-6, np.arange(0, 7.2, 0.2), extend='max
 # Contour the 2 PVU (dynamic tropopause) surface.
 line = map.contour(x, y, pv_low_shifted/(1e-6), [2], colors = 'black')
 # Add polygon for wave break region.
-p1, p2, p3, p4 = DrawPolygon(map, lat_range = [lat_ave1, lat_ave2], lon_range = [lon_ave1, lon_ave2], grid_space = 1.5, lw = 3, color = 'black')
+p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [lat_ave1, lat_ave2], lon_range = [lon_ave1, lon_ave2], grid_space = 1.5, lw = 3, color = 'black')
 # Create sequential colorbar and labels.
 cbar = map.colorbar(cs, location = 'bottom', pad = "5%", ticks = np.arange(0, 8, 1))
 cbar.ax.set_xlabel('PV (PVU)', fontsize = 12)
@@ -420,7 +419,7 @@ pv_high_shifted, lons_shifted = addcyclic(pv_high, lon_region)
 # Mesh the grid.
 lons, lats = np.meshgrid(lons_shifted, lat_region)
 # Generate N Hemi map.
-map = NPStere_Map(9, -100)
+map = gen_utils.NPStere_Map(9, -100)
 # Map lons and lats to x,y coords.
 x, y = map(lons, lats)
 # Contourf high PV composite map.
@@ -428,7 +427,7 @@ cs = map.contourf(x, y, pv_high_shifted/1e-6, np.arange(0, 7.2, 0.2), extend='ma
 # Contour the 2 PVU.
 line = map.contour(x, y, pv_high_shifted/(1e-6), [2], colors = 'black')
 # Generate polygon for wave break region.
-p1, p2, p3, p4 = DrawPolygon(map, lat_range = [lat_ave1, lat_ave2], lon_range = [lon_ave1, lon_ave2], grid_space = 1.5, lw = 3, color = 'black')
+p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [lat_ave1, lat_ave2], lon_range = [lon_ave1, lon_ave2], grid_space = 1.5, lw = 3, color = 'black')
 # Create sequential colorbar and labels.
 cbar = map.colorbar(cs, location = 'bottom', pad = "5%", ticks = np.arange(0, 8, 1))
 cbar.ax.set_xlabel('PV (PVU)', fontsize = 12)
@@ -446,7 +445,7 @@ lons, lats = np.meshgrid(lons_shifted, lat_region)
 # Mask the field where significance >5% and <95%.
 pv_masked = np.ma.masked_where((sig_shifted >= perc1)&(sig_shifted <= perc2), pv_diff_shifted)
 # Generate N Hemi map.
-map = map = NPStere_Map(9, -100)
+map = map = gen_utils.NPStere_Map(9, -100)
 # Map lons and lats to x,y coords.
 x, y = map(lons, lats)
 # Contourf diff PV composite map.
@@ -454,7 +453,7 @@ cs = map.contourf(x, y, pv_diff_shifted/1e-6, clevs_pv, norm = norm, extend='bot
 # Hatch significance.
 pcol = plt.pcolor(x, y, pv_masked, hatch = '////', alpha = 0)
 # Generate polygon for wave break region.
-p1, p2, p3, p4 = DrawPolygon(map, lat_range = [lat_ave1, lat_ave2], lon_range = [lon_ave1, lon_ave2], grid_space = 1.5, lw = 3, color = 'black')
+p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [lat_ave1, lat_ave2], lon_range = [lon_ave1, lon_ave2], grid_space = 1.5, lw = 3, color = 'black')
 # Create diverging colorbar and labels.
 cbar = map.colorbar(cs, location = 'bottom', pad = "5%", ticks = np.arange(-5, 6, 1))
 cbar.ax.set_xlabel('PV (PVU)', fontsize = 12)

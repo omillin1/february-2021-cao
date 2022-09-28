@@ -1,4 +1,6 @@
 ###### Import modules ######
+import sys
+sys.path.insert(4, '../')
 import numpy as np
 from netCDF4 import Dataset, num2date
 import os
@@ -8,10 +10,7 @@ import glob
 from datetime import datetime, timedelta
 from matplotlib.dates import DateFormatter, MonthLocator
 import pickle
-dir = '/share/data1/Students/ollie/CAOs/project-2021-cao/Functions'
-path = os.chdir(dir)
-from model_utils import load_latlon, load_modelparam
-from gen_utils import NormColorMap, NPStere_Map, DrawPolygon
+from Functions import model_utils, gen_utils
 
 # Select lat, lon, level bounds.
 lat1, lat2 = 79.5, 19.5
@@ -22,24 +21,8 @@ level_select = 500
 # Go to directory for data.
 dir = '/share/data1/Students/ollie/CAOs/Data/Feb_2021_CAO/Model_Data/ECMWF/hgt'
 path = os.chdir(dir)
-# Open the file.
-nc = Dataset('climo_ECMWF_hgt_hindcast.nc', 'r')
-# Read in lat, lon, levels.
-ltm_latitude, ltm_longitude = load_latlon(nc)
-ltm_levels = nc.variables['level'][:]
-# Load model hindcast dates, days array and the ltm hgt array.
-ltm_dates = num2date(nc.variables['hdates'][:], nc.variables['hdates'].units, calendar = 'gregorian', only_use_cftime_datetimes=False, only_use_python_datetimes=True)
-ltm_days = nc.variables['days'][:]
-ltm_hgt = nc.variables['hgt'][:]
-# Close the file
-nc.close()
-
-# Find the lat, lon, and level indices according to the bounds.
-ltm_lat_ind1, ltm_lat_ind2 = np.where(ltm_latitude == lat1)[0][0], np.where(ltm_latitude == lat2)[0][0]
-ltm_lon_ind1, ltm_lon_ind2 = np.where(ltm_longitude == lon1)[0][0], np.where(ltm_longitude == lon2)[0][0]
-level_ind = np.where(ltm_levels == level_select)[0][0]
-# Restrict the ltm GPH to the region bounds you want.
-hgt_ltm_region = ltm_hgt[:, :, level_ind, ltm_lat_ind1:ltm_lat_ind2+1, ltm_lon_ind1:ltm_lon_ind2+1]
+# Read the ltm data.
+ltm_latitude, ltm_longitude, ltm_levels, ltm_dates, ltm_days, hgt_ltm_region = model_utils.load_model_ltm_3D('ECMWF', 'hgt', [lat1, lat2], [lon1, lon2], 500)
 
 ###### Read in the realtime model data. ######
 # Choose model.
@@ -53,9 +36,9 @@ path = os.chdir(dir)
 filename =f'{model}_hgt_2021-01-04_perturbed.nc'
 nc = Dataset(filename, 'r')
 # Load the latitude, longitude, level, time, and ensemble number test data for later.
-mod_latitude, mod_longitude = load_latlon(nc)
+mod_latitude, mod_longitude = model_utils.load_latlon(nc)
 level = nc.variables['level'][:]
-time, number = load_modelparam(nc)[0], load_modelparam(nc)[1]
+time, number = model_utils.load_modelparam(nc)[0:2]
 # Close the nc file.
 nc.close()
 
@@ -74,29 +57,8 @@ date_end = '2021-02-04'
 start_date = datetime(2021, 2, 8, 0, 0)
 end_date = datetime(2021, 2, 10, 0, 0)
 
-# Do perturbation indexing.
-# Go to directory and get all files ending with "perturbed.nc".
-model_dir_pert = f'/data/deluge/models/S2S/realtime/{model}/hgt/*perturbed.nc'
-files_pert = glob.glob(model_dir_pert)
-# Sort the files.
-files_pert.sort()
-# Get the date string in YYYY-MM-DD format.
-model_dates_pert = [i.split("_")[2] for i in files_pert]
-# Find where our chosen dates are in this data.
-pert_ind1 = model_dates_pert.index(date_init)
-pert_ind2 = model_dates_pert.index(date_end)
-
-# Do control indexing.
-# Go to directory and get all files ending with "control.nc".
-model_dir_con = f'/data/deluge/models/S2S/realtime/{model}/hgt/*control.nc'
-files_con = glob.glob(model_dir_con)
-# Sort the files.
-files_con.sort()
-# Get the date string in YYYY-MM-DD format.
-model_dates_con = [i.split("_")[2] for i in files_con]
-# Find where our chosen dates are in this data.
-con_ind1 = model_dates_con.index(date_init)
-con_ind2 = model_dates_con.index(date_end)
+# Do perturbation indexing for ECMWF.
+files_pert, files_con, pert_ind1, pert_ind2, con_ind1, con_ind2, model_dates_pert, model_dates_con = model_utils.sort_file_realtime([date_init, date_end], 'ECMWF', 'hgt')
 
 # Now get the perturbed and control arrays to put data into using np.zeros. Perturbed will be shaped INIT NO. x time x number x lat x lon.
 # Control will be shaped INIT NO. x time x lat x lon.
