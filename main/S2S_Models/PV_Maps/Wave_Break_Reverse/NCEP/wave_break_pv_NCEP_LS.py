@@ -347,7 +347,7 @@ cbar.set_label("T2M Anomaly ($^\circ$C)", fontsize = 16)
 # Set colorbar tick size.
 cbar.ax.tick_params(labelsize=13)
 # Save the figure.
-plt.savefig(f'/share/data1/Students/ollie/CAOs/project-2021-cao/main/S2S_Models/PV_Maps/Wave_Break_Reverse/NCEP/test_{date_str}_greenland_t2m_ncep.png', bbox_inches = 'tight', dpi = 500)
+plt.savefig(f'/share/data1/Students/ollie/CAOs/project-2021-cao/main/S2S_Models/PV_Maps/Wave_Break_Reverse/NCEP/ls_wb_ncep_t2m_{date_str}.png', bbox_inches = 'tight', dpi = 500)
 
 ###### COMPOSITE PV PATTERNS ######
 # Composite mean of low pv maps.
@@ -466,4 +466,4 @@ cbar.ax.tick_params(labelsize=11)
 ax.set_title(f"c) LOW - HIGH PV", fontsize = 15, weight = 'bold')
 plt.tight_layout()
 # Save figure.
-plt.savefig(f'/share/data1/Students/ollie/CAOs/project-2021-cao/main/S2S_Models/PV_Maps/Wave_Break_Reverse/NCEP/test_{date_str}_greenland_pv_ncep.png', bbox_inches = 'tight', dpi = 500)
+plt.savefig(f'/share/data1/Students/ollie/CAOs/project-2021-cao/main/S2S_Models/PV_Maps/Wave_Break_Reverse/NCEP/ls_wb_ncep_pv_{date_str}.png', bbox_inches = 'tight', dpi = 500)
