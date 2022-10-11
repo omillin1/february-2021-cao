@@ -359,4 +359,4 @@ cbar = fig.colorbar(cs, cax=cb_ax,orientation="horizontal",ticks= np.arange(-8, 
 cbar.set_label("T2M Anomaly ($^\circ$C)", fontsize = 16)
 # Set colorbar tick size.
 cbar.ax.tick_params(labelsize=13)
-plt.savefig(f'/share/data1/Students/ollie/CAOs/project-2021-cao/main/S2S_Models/PV_Maps/Wave_Break_Reverse/ECMWF/test_{date_str}_canada_t2m_ecmwf_both.png', bbox_inches = 'tight', dpi = 500)
+plt.savefig(f'/share/data1/Students/ollie/CAOs/project-2021-cao/main/S2S_Models/PV_Maps/Wave_Break_Reverse/ECMWF/both_wb_ecmwf_{date_str}.png', bbox_inches = 'tight', dpi = 500)
