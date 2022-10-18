@@ -84,7 +84,7 @@ for i in range(len(time_period1)):
         cs = map.contourf(x, y, pv_shifted/(1e-6), np.arange(0, 7.2, 0.2), extend='max', cmap = 'Spectral_r')
         line = map.contour(x, y, pv_shifted/(1e-6), [2], colors = 'black')
         p1, p2, p3, p4 = DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
-        text = ax.text(-1500000,9000000,"Wave Break 1", size=15, verticalalignment='center', rotation=90., weight = 'bold')
+        text = ax.text(-1500000,9000000,"East Siberian Sea Wave Break", size=13, verticalalignment='center', rotation=90., weight = 'bold')
         ax.set_title(f"{labels[i]} {time_period1[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         plt.tight_layout()
     else:
@@ -120,7 +120,7 @@ for i in range(len(time_period2)):
         line = map.contour(x, y, pv_shifted/(1e-6), [2], colors = 'black')
         p1, p2, p3, p4 = DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
         ax.set_title(f"{labels[i+3]} {time_period2[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
-        text = ax.text(-1500000,9000000,"Wave Break 2", size=15, verticalalignment='center', rotation=90., weight = 'bold')
+        text = ax.text(-1500000,9000000,"Labrador Sea Wave Break", size=13, verticalalignment='center', rotation=90., weight = 'bold')
         plt.tight_layout()
     else:
         pv_shifted, lons_shifted = addcyclic(pv_period2[i], lon_region)

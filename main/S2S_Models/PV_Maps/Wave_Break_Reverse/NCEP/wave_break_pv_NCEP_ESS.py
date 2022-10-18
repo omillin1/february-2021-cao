@@ -83,7 +83,7 @@ wb_ave_pv = np.nanmean(lat_ave_pv, axis = -1)/(1e-6) # Unit conversion to look a
 ###### SEPARATE WAVE BREAK ENSEMBLE MEMBERS ######
 # Sort the wave break region averaged PV from low to high and get indices.
 ind_sort = np.argsort(wb_ave_pv)
-# Take 5 members, approx 10% of 51.
+# Take 3 members, approx 10%.
 no_members = 3
 # Find the member indexes with lowest and highest PV values.
 lowest_members, highest_members = ind_sort[:no_members], ind_sort[-no_members:]

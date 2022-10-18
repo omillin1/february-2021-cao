@@ -137,7 +137,7 @@ for i in range(len(time_period2)):
 
 cb_ax = fig.add_axes([0.05, -0.01, 0.91, 0.04])
 cbar = fig.colorbar(cs, cax=cb_ax,orientation="horizontal",ticks= np.arange(270, 360, 10),extend="max",spacing='proportional')
-cbar.set_label("Theta (C)", fontsize = 17)
+cbar.set_label("2 PVU Potential Temperature (K)", fontsize = 17)
 cbar.ax.tick_params(labelsize=15)
 plt.savefig("/share/data1/Students/ollie/CAOs/project-2021-cao/main/Reanalysis_Plots/Theta_2PVU/ERA5/pt_2021.png", bbox_inches = 'tight', dpi = 500)
 
@@ -172,7 +172,7 @@ nrows = 2
 ncols = 3
 fig_no = np.arange(1, 9, 1)
 labels = ['a)', 'b)', 'c)', 'd)', 'e)', 'f)']
-fig = plt.figure(figsize=(12, 9))
+fig = plt.figure(figsize=(12, 8))
 for i in range(len(time_period1)):
     if i == 0:
         pt_shifted, lons_shifted = addcyclic(period1_anom[i], lon_region)
@@ -187,7 +187,7 @@ for i in range(len(time_period1)):
         # Contourf.
         cs = map.contourf(x, y, pt_shifted, clevs, extend='both', norm = norm, cmap = my_cmap)
         p1, p2, p3, p4 = DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
-        text = ax.text(-500000,2500000,"Wave Break 1", size=15, verticalalignment='center', rotation=90., weight = 'bold')
+        text = ax.text(-500000,2500000,"East Siberian Sea Wave Break", size=13, verticalalignment='center', rotation=90., weight = 'bold')
         ax.set_title(f"{labels[i]} {time_period1[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         plt.tight_layout()
     else:
@@ -221,7 +221,7 @@ for i in range(len(time_period2)):
         cs = map.contourf(x, y, pt_shifted, clevs, extend='both', norm = norm, cmap = my_cmap)
         p1, p2, p3, p4 = DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
         ax.set_title(f"{labels[i+3]} {time_period2[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
-        text = ax.text(-400000,2100000,"Wave Break 2", size=15, verticalalignment='center', rotation=90., weight = 'bold')
+        text = ax.text(-400000,2100000,"Labrador Sea Wave Break", size=13, verticalalignment='center', rotation=90., weight = 'bold')
         plt.tight_layout()
     else:
         pt_shifted, lons_shifted = addcyclic(period2_anom[i], lon_region)
@@ -241,6 +241,6 @@ for i in range(len(time_period2)):
 
 cb_ax = fig.add_axes([0.05, -0.01, 0.91, 0.04])
 cbar = fig.colorbar(cs, cax=cb_ax,orientation="horizontal",ticks = np.arange(-30, 40, 10),extend="both")
-cbar.set_label("Theta Anomaly (C)", fontsize = 17)
+cbar.set_label("2 PVU Potential Temperature Anomaly ($^\circ$C)", fontsize = 17)
 cbar.ax.tick_params(labelsize=15)
 plt.savefig("/share/data1/Students/ollie/CAOs/project-2021-cao/main/Reanalysis_Plots/Theta_2PVU/ERA5/pt_2021_anom.png", bbox_inches = 'tight', dpi = 500)
