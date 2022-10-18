@@ -1,12 +1,13 @@
+###### IMPORT MODULES ######
+import sys
+sys.path.insert(5, '../')
 import matplotlib.pyplot as plt
 import numpy as np
 from netCDF4 import Dataset, num2date
 import os
 from datetime import datetime, timedelta
 from mpl_toolkits.basemap import Basemap, addcyclic
-path = '/share/data1/Students/ollie/CAOs/project-2021-cao/Functions'
-dir = os.chdir(path)
-from gen_utils import DrawPolygon, NormColorMap, NPStere_Map
+from Functions import gen_utils, model_utils
 
 # Get region descriptors to import data.
 region = 'nhemi'
@@ -135,7 +136,7 @@ t2m_all = np.stack([t2m_period1, t2m_period2, t2m_period3])
 ###### PLOTTING ######
 ##### Set custom normalized colormap for t2m anomalies. #####
 clevs = np.arange(-20, 21, 1)
-my_cmap, norm = NormColorMap('RdBu_r', clevs)
+my_cmap, norm = gen_utils.NormColorMap('RdBu_r', clevs)
 
 # Now loop through each period and plot!
 # Set rows and columns for subplotting.
@@ -154,7 +155,7 @@ for i in range(3):
     # Add subplot at given position.
     ax = fig.add_subplot(nrows, ncols, fig_no[i])
     # Create map.
-    map = NPStere_Map()
+    map = gen_utils.NPStere_Map()
     # Create x and y coordinates.
     x,y = map(lons, lats)
     # Contourf the t2m anomalies.
@@ -163,7 +164,7 @@ for i in range(3):
     lines2 = map.contour(x, y, hgts_shifted, levels = [-30, -25, -20, -15, -10,-5, 5, 10, 15, 20, 25, 30], colors = 'black')
     plt.clabel(lines2)
     # Draw Great Plains polygon.
-    p1, p2, p3, p4 = DrawPolygon(map, lat_range = [48, 30], lon_range = [256.5, 268.5], grid_space = 0.5, lw = 2, color = 'purple')
+    p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [48, 30], lon_range = [256.5, 268.5], grid_space = 0.5, lw = 2, color = 'purple')
     # Set figure title.
     ax.set_title(f"{labels[i]} {periods_all[i][0].strftime('%Y-%m-%d')} - {periods_all[i][1].strftime('%Y-%m-%d')}", fontsize = 14, weight = 'bold')
     plt.tight_layout()
