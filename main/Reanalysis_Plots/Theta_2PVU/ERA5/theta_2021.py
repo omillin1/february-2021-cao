@@ -1,3 +1,6 @@
+###### IMPORT MODULES ######
+import sys
+sys.path.insert(4, '../')
 import numpy as np
 from netCDF4 import Dataset, num2date
 from datetime import datetime, timedelta
@@ -8,10 +11,7 @@ from matplotlib import cm, colors
 import glob
 from tqdm import tqdm
 from scipy.stats import mode, percentileofscore
-dir = '/share/data1/Students/ollie/Functions'
-path = os.chdir(dir)
-from gen_utils import DrawPolygon, LambConfMap, NormColorMap, NPStere_Map
-from model_utils import load_latlon, load_modelparam
+from Functions import gen_utils, model_utils
 
 # Go to directory with the data in.
 path = '/share/data1/Students/ollie/CAOs/Data/Feb_2021_CAO/ERA5/theta'
@@ -76,13 +76,13 @@ for i in range(len(time_period1)):
 
         ax = fig.add_subplot(nrows, ncols, fig_no[i])
         # Basemap plot.
-        map = LambConfMap(width = 8000000, height = 7100000, area_thresh = 1000.0, lat_range = [89.5, 60], center_range = [65.0, 200])
+        map = gen_utils.LambConfMap(width = 8000000, height = 7100000, area_thresh = 1000.0, lat_range = [89.5, 60], center_range = [65.0, 200])
 
         x, y = map(lons, lats)
 
         # Contourf.
         cs = map.contourf(x, y, pt_shifted, np.arange(270, 352, 2), extend='max', cmap = 'Spectral_r')
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
+        p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
         #text = ax.text(-1500000,9000000,"Wave Break 1", size=15, verticalalignment='center', rotation=90., weight = 'bold')
         ax.set_title(f"{labels[i]} {time_period1[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         plt.tight_layout()
@@ -92,13 +92,13 @@ for i in range(len(time_period1)):
 
         ax = fig.add_subplot(nrows, ncols, fig_no[i])
         # Basemap plot.
-        map = LambConfMap(width = 8000000, height = 7100000, area_thresh = 1000.0, lat_range = [89.5, 60], center_range = [65.0, 200])
+        map = gen_utils.LambConfMap(width = 8000000, height = 7100000, area_thresh = 1000.0, lat_range = [89.5, 60], center_range = [65.0, 200])
 
         x, y = map(lons, lats)
 
         # Contourf.
         cs = map.contourf(x, y, pt_shifted, np.arange(270, 352, 2), extend='max', cmap = 'Spectral_r')
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
+        p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
         ax.set_title(f"{labels[i]} {time_period1[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         plt.tight_layout()
 
@@ -109,13 +109,13 @@ for i in range(len(time_period2)):
 
         ax = fig.add_subplot(nrows, ncols, fig_no[i+3])
         # Basemap plot.
-        map = LambConfMap(width = 7000000, height = 6100000, area_thresh = 1000.0, lat_range = [70, 40], center_range = [55.0, 310])
+        map = gen_utils.LambConfMap(width = 7000000, height = 6100000, area_thresh = 1000.0, lat_range = [70, 40], center_range = [55.0, 310])
 
         x, y = map(lons, lats)
 
         # Contourf.
         cs = map.contourf(x, y, pt_shifted, np.arange(270, 352, 2), extend='max', cmap = 'Spectral_r')
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
+        p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
         ax.set_title(f"{labels[i+3]} {time_period2[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         #text = ax.text(-1500000,9000000,"Wave Break 2", size=15, verticalalignment='center', rotation=90., weight = 'bold')
         plt.tight_layout()
@@ -125,13 +125,13 @@ for i in range(len(time_period2)):
 
         ax = fig.add_subplot(nrows, ncols, fig_no[i+3])
         # Basemap plot.
-        map = LambConfMap(width = 7000000, height = 6100000, area_thresh = 1000.0, lat_range = [70, 40], center_range = [55.0, 310])
+        map = gen_utils.LambConfMap(width = 7000000, height = 6100000, area_thresh = 1000.0, lat_range = [70, 40], center_range = [55.0, 310])
 
         x, y = map(lons, lats)
 
         # Contourf.
         cs = map.contourf(x, y, pt_shifted, np.arange(270, 352, 2), extend='max', cmap = 'Spectral_r')
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
+        p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
         ax.set_title(f"{labels[i+3]} {time_period2[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         plt.tight_layout()
 
@@ -164,7 +164,7 @@ period2_anom = pt_period2 - theta_ltm[ltm_time_ind3:ltm_time_ind4+1]
 # Now plot!
 # Normalized color map.
 clevs = np.arange(-30, 32, 2)
-my_cmap, norm = NormColorMap('RdBu_r', clevs)
+my_cmap, norm = gen_utils.NormColorMap('RdBu_r', clevs)
 
 # Make figure.
 # Fig dimensions:
@@ -180,13 +180,13 @@ for i in range(len(time_period1)):
 
         ax = fig.add_subplot(nrows, ncols, fig_no[i])
         # Basemap plot.
-        map = LambConfMap(width = 6000000, height = 5100000, area_thresh = 1000.0, lat_range = [89.5, 60], center_range = [70.0, 200])
+        map = gen_utils.LambConfMap(width = 6000000, height = 5100000, area_thresh = 1000.0, lat_range = [89.5, 60], center_range = [70.0, 200])
 
         x, y = map(lons, lats)
 
         # Contourf.
         cs = map.contourf(x, y, pt_shifted, clevs, extend='both', norm = norm, cmap = my_cmap)
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
+        p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
         text = ax.text(-500000,2500000,"East Siberian Sea Wave Break", size=13, verticalalignment='center', rotation=90., weight = 'bold')
         ax.set_title(f"{labels[i]} {time_period1[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         plt.tight_layout()
@@ -196,13 +196,13 @@ for i in range(len(time_period1)):
 
         ax = fig.add_subplot(nrows, ncols, fig_no[i])
         # Basemap plot.
-        map = LambConfMap(width = 6000000, height = 5100000, area_thresh = 1000.0, lat_range = [89.5, 60], center_range = [70.0, 200])
+        map = gen_utils.LambConfMap(width = 6000000, height = 5100000, area_thresh = 1000.0, lat_range = [89.5, 60], center_range = [70.0, 200])
 
         x, y = map(lons, lats)
 
         # Contourf.
         cs = map.contourf(x, y, pt_shifted, clevs, extend='both', norm = norm, cmap = my_cmap)
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
+        p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
         ax.set_title(f"{labels[i]} {time_period1[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         plt.tight_layout()
 
@@ -213,13 +213,13 @@ for i in range(len(time_period2)):
 
         ax = fig.add_subplot(nrows, ncols, fig_no[i+3])
         # Basemap plot.
-        map = LambConfMap(width = 5000000, height = 4100000, area_thresh = 1000.0, lat_range = [70, 40], center_range = [57, 310])
+        map = gen_utils.LambConfMap(width = 5000000, height = 4100000, area_thresh = 1000.0, lat_range = [70, 40], center_range = [57, 310])
 
         x, y = map(lons, lats)
 
         # Contourf.
         cs = map.contourf(x, y, pt_shifted, clevs, extend='both', norm = norm, cmap = my_cmap)
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
+        p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
         ax.set_title(f"{labels[i+3]} {time_period2[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         text = ax.text(-400000,2100000,"Labrador Sea Wave Break", size=13, verticalalignment='center', rotation=90., weight = 'bold')
         plt.tight_layout()
@@ -229,13 +229,13 @@ for i in range(len(time_period2)):
 
         ax = fig.add_subplot(nrows, ncols, fig_no[i+3])
         # Basemap plot.
-        map = LambConfMap(width = 5000000, height = 4100000, area_thresh = 1000.0, lat_range = [70, 40], center_range = [57.0, 310])
+        map = gen_utils.LambConfMap(width = 5000000, height = 4100000, area_thresh = 1000.0, lat_range = [70, 40], center_range = [57.0, 310])
 
         x, y = map(lons, lats)
 
         # Contourf.
         cs = map.contourf(x, y, pt_shifted, clevs, extend='both', norm = norm, cmap = my_cmap)
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
+        p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
         ax.set_title(f"{labels[i+3]} {time_period2[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         plt.tight_layout()
 

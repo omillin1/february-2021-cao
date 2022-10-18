@@ -1,3 +1,6 @@
+###### IMPORT MODULES ######
+import sys
+sys.path.insert(4, '../')
 import numpy as np
 from netCDF4 import Dataset, num2date
 from datetime import datetime, timedelta
@@ -8,10 +11,7 @@ from matplotlib import cm, colors
 import glob
 from tqdm import tqdm
 from scipy.stats import mode, percentileofscore
-dir = '/share/data1/Students/ollie/CAOs/project-2021-cao/Functions'
-path = os.chdir(dir)
-from gen_utils import DrawPolygon, LambConfMap, NormColorMap, NPStere_Map
-from model_utils import load_latlon, load_modelparam
+from Functions import gen_utils, model_utils
 
 # Go to directory with the data in.
 path = '/share/data1/Students/ollie/CAOs/Data/Feb_2021_CAO/ERA5/PV'
@@ -76,14 +76,14 @@ for i in range(len(time_period1)):
 
         ax = fig.add_subplot(nrows, ncols, fig_no[i])
         # Basemap plot.
-        map = NPStere_Map(21, -100)
+        map = gen_utils.NPStere_Map(21, -100)
 
         x, y = map(lons, lats)
 
         # Contourf.
         cs = map.contourf(x, y, pv_shifted/(1e-6), np.arange(0, 7.2, 0.2), extend='max', cmap = 'Spectral_r')
         line = map.contour(x, y, pv_shifted/(1e-6), [2], colors = 'black')
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
+        p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
         text = ax.text(-1500000,9000000,"East Siberian Sea Wave Break", size=13, verticalalignment='center', rotation=90., weight = 'bold')
         ax.set_title(f"{labels[i]} {time_period1[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         plt.tight_layout()
@@ -93,14 +93,14 @@ for i in range(len(time_period1)):
 
         ax = fig.add_subplot(nrows, ncols, fig_no[i])
         # Basemap plot.
-        map = NPStere_Map(21, -100)
+        map = gen_utils.NPStere_Map(21, -100)
 
         x, y = map(lons, lats)
 
         # Contourf.
         cs = map.contourf(x, y, pv_shifted/(1e-6), np.arange(0, 7.2, 0.2), extend='max', cmap = 'Spectral_r')
         line = map.contour(x, y, pv_shifted/(1e-6), [2], colors = 'black')
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
+        p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [85.5, 66], lon_range = [111, 187.5], grid_space = 0.5, lw = 3, color = 'black')
         ax.set_title(f"{labels[i]} {time_period1[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         plt.tight_layout()
 
@@ -111,14 +111,14 @@ for i in range(len(time_period2)):
 
         ax = fig.add_subplot(nrows, ncols, fig_no[i+3])
         # Basemap plot.
-        map = NPStere_Map(21, -100)
+        map = gen_utils.NPStere_Map(21, -100)
 
         x, y = map(lons, lats)
 
         # Contourf.
         cs = map.contourf(x, y, pv_shifted/(1e-6), np.arange(0, 7.2, 0.2), extend='max', cmap = 'Spectral_r')
         line = map.contour(x, y, pv_shifted/(1e-6), [2], colors = 'black')
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
+        p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
         ax.set_title(f"{labels[i+3]} {time_period2[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         text = ax.text(-1500000,9000000,"Labrador Sea Wave Break", size=13, verticalalignment='center', rotation=90., weight = 'bold')
         plt.tight_layout()
@@ -128,14 +128,14 @@ for i in range(len(time_period2)):
 
         ax = fig.add_subplot(nrows, ncols, fig_no[i+3])
         # Basemap plot.
-        map = NPStere_Map(21, -100)
+        map = gen_utils.NPStere_Map(21, -100)
 
         x, y = map(lons, lats)
 
         # Contourf.
         cs = map.contourf(x, y, pv_shifted/(1e-6), np.arange(0, 7.2, 0.2), extend='max', cmap = 'Spectral_r')
         line = map.contour(x, y, pv_shifted/(1e-6), [2], colors = 'black')
-        p1, p2, p3, p4 = DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
+        p1, p2, p3, p4 = gen_utils.DrawPolygon(map, lat_range = [60, 48], lon_range = [291, 324], grid_space = 0.5, lw = 3, color = 'black')
         ax.set_title(f"{labels[i+3]} {time_period2[i].strftime('%Y/%m/%d')}", fontsize = 16, weight = 'bold')
         plt.tight_layout()
 
